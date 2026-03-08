@@ -35,7 +35,7 @@ app.post('/webhook', async (req, res) => {
             const elements = [{
                 title: "আপনাকে কীভাবে সাহায্য করতে পারি?\n\n",
                 subtitle:" .................",
-                image_url: "https://quantummethod.org.bd/en" // এখানে আপনার ছবির লিঙ্ক দিন
+                image_url: "/workspaces/Messenger-bot-main/homepage_slide_icon_borso_34_20251231.png" // এখানে আপনার ছবির লিঙ্ক দিন
             }];
 
             const welcomeText = 
@@ -43,11 +43,11 @@ app.post('/webhook', async (req, res) => {
                     "2️⃣ আমাদের সম্পর্কে বিস্তারিত জানতে চাইলে নিচের ❷ নম্বর বাটনে ক্লিক করুন।";
 
             const quickReplies = [
-                { content_type: "text", title: "     ❶     ", payload: "1" },
-                { content_type: "text", title: "     ❷     ", payload: "2" }
+                { content_type: "text", title: "     ❶   ->👤  ", payload: "1" },
+                { content_type: "text", title: "     ❷   ->📖  ", payload: "2" }
             ];
 
-            await sendGenericWithQuickReplies(senderId, elements, quickReplies);
+            await sendGenericWithQuickReplies(senderId, elements,welcomeText, quickReplies);
         }
         else if (text === '1' || text === '2') {
             const response = await axios.post(GOOGLE_APPS_SCRIPT_URL, { senderId, text, type: 'choice' });
