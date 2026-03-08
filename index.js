@@ -6,7 +6,7 @@ app.use(bodyParser.json());
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
 const GOOGLE_APPS_SCRIPT_URL = process.env.GOOGLE_APPS_SCRIPT_URL;
-const VERIFY_TOKEN=rocess.env.VERIFY_TOKEN
+const VERIFY_TOKEN=process.env.VERIFY_TOKEN
 
 app.post('/webhook', async (req, res) => {
     // ফেসবুক থেকে ইভেন্ট ডাটা নেওয়া
