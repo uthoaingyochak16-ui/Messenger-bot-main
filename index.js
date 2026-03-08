@@ -34,9 +34,9 @@ app.post('/webhook', async (req, res) => {
         }
         else if (['hi', 'hello', 'হাই', 'হ্যালো'].includes(text.toLowerCase())) {
             // সুন্দর বাটন টেম্পলেট
-            await sendButtonTemplate(senderId, "আপনাকে কীভাবে সহায়তা করতে পারি?", [
-                { type: "postback", title: "প্রতিনিধির সাথে কথা বলুন", payload: "1" },
-                { type: "postback", title: "আমাদের ওয়েবসাইট", payload: "2" }
+            await sendButtonTemplate(senderId,"আপনাকে কীভাবে সহায়তা করতে পারি?\n\n" +"আমাদের প্রতিনিধির সাথে সরাসরি যোগাযোগ করতে চাইলে নিচের 1 নম্বর বাটনে ক্লিক করুন।\n" +"আমাদের সম্পর্কে বিস্তারিত জানতে চাইলে নিচের 2 নম্বর বাটনে ক্লিক করুন।", [
+                { type: "postback", title: "❶", payload: "1" },
+                { type: "postback", title: "❷", payload: "2" }
             ]);
         }
         else if (text === '1' || text === '2') {
