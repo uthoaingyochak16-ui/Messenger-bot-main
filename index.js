@@ -20,19 +20,23 @@ app.post('/webhook', async (req, res) => {
     const entry = req.body.entry ? req.body.entry[0] : null;
     const messaging = entry ? entry.messaging[0] : null;
 
-    if (messaging && messaging.message) {
+    if (messaging) {
         const senderId = messaging.sender.id;
-        // ইউজার কুইক রিপ্লাই ক্লিক করলে সেটি payload হিসেবে আসে, যা টেক্সট হিসেবে হ্যান্ডেল হবে
-        const text = messaging.message.quick_reply ? messaging.message.quick_reply.payload : (messaging.message.text ? messaging.message.text.trim() : "");
+
+        // পোস্টব্যাক, কুইক রিপ্লাই এবং টেক্সট মেসেজ হ্যান্ডল করার সঠিক লজিক
+        const text = messaging.postback ? messaging.postback.payload : 
+                     (messaging.message && messaging.message.quick_reply ? messaging.message.quick_reply.payload : 
+                     (messaging.message && messaging.message.text ? messaging.message.text.trim() : ""));
 
         if (text.includes(',')) {
             const response = await axios.post(GOOGLE_APPS_SCRIPT_URL, { senderId, text, type: 'data' });
             await sendMessage(senderId, response.data.reply);
         }
         else if (['hi', 'hello', 'হাই', 'হ্যালো'].includes(text.toLowerCase())) {
-            await sendQuickReply(senderId, "আমি আপনাকে কিভাবে সাহায্য করতে পারি?", [
-                { title: "১. প্রতিনিধির সাথে যোগাযোগ", payload: "1" },
-                { title: "২. আমাদের ওয়েবসাইট", payload: "2" }
+            // সুন্দর বাটন টেম্পলেট
+            await sendButtonTemplate(senderId, "আপনাকে কীভাবে সহায়তা করতে পারি?", [
+                { type: "postback", title: "প্রতিনিধির সাথে কথা বলুন", payload: "1" },
+                { type: "postback", title: "আমাদের ওয়েবসাইট", payload: "2" }
             ]);
         }
         else if (text === '1' || text === '2') {
@@ -43,6 +47,7 @@ app.post('/webhook', async (req, res) => {
     res.sendStatus(200);
 });
 
+// সাধারণ টেক্সট মেসেজ পাঠানোর ফাংশন
 async function sendMessage(senderId, text) {
     await axios.post(`https://graph.facebook.com/v19.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
         recipient: { id: senderId },
@@ -50,15 +55,20 @@ async function sendMessage(senderId, text) {
     });
 }
 
-async function sendQuickReply(senderId, text, options) {
-    const quick_replies = options.map(opt => ({
-        content_type: "text",
-        title: opt.title,
-        payload: opt.payload
-    }));
+// প্রফেশনাল বাটন টেম্পলেট পাঠানোর ফাংশন
+async function sendButtonTemplate(senderId, text, buttons) {
     await axios.post(`https://graph.facebook.com/v19.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
         recipient: { id: senderId },
-        message: { text: text, quick_replies: quick_replies }
+        message: {
+            attachment: {
+                type: "template",
+                payload: {
+                    template_type: "button",
+                    text: text,
+                    buttons: buttons
+                }
+            }
+        }
     });
 }
 
