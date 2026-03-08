@@ -35,7 +35,7 @@ app.post('/webhook', async (req, res) => {
             const elements = [{
                 title: "আপনাকে কীভাবে সাহায্য করতে পারি?\n\n",
                 subtitle:" .................",
-                image_url: "/workspaces/Messenger-bot-main/homepage_slide_icon_borso_34_20251231.png" // এখানে আপনার ছবির লিঙ্ক দিন
+                image_url: "https://files.quantummethod.org.bd/media/image/static_content/homepage_slide_icon_borso_34_20251231.png" // এখানে আপনার ছবির লিঙ্ক দিন
             }];
 
             const welcomeText = 
