@@ -1,173 +1,198 @@
-const express = require('express');
-const axios = require('axios');
+const express = require("express");
+const axios = require("axios");
 
 const app = express();
+
 app.use(express.json());
 
 const PAGE_ACCESS_TOKEN = process.env.PAGE_ACCESS_TOKEN;
-const SHEET_URL = process.env.SHEET_URL;
-const VERIFY_TOKEN =process.env.PAGE_ACCESS_TOKEN;
-// =======================
-// WEBHOOK VERIFY (optional)
-// =======================
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const SCRIPT_URL = process.env.SCRIPT_URL;
+const PORT = process.env.PORT || 3000;
 
-app.get('/', (req, res) => {
-    res.send("Bot Running Successfully");
+
+
+// =============================
+// VERIFY WEBHOOK
+// =============================
+
+app.get("/webhook", (req, res) => {
+
+  const mode = req.query["hub.mode"];
+  const token = req.query["hub.verify_token"];
+  const challenge = req.query["hub.challenge"];
+
+  if (mode && token === VERIFY_TOKEN) {
+
+    return res.status(200).send(challenge);
+
+  }
+
+  res.sendStatus(403);
+
 });
 
-// =======================
+
+
+// =============================
 // MAIN WEBHOOK
-// =======================
+// =============================
 
-app.post('/webhook', async (req, res) => {
+app.post("/webhook", async (req, res) => {
 
-    try {
+  const body = req.body;
 
-        if (!req.body.entry) return res.sendStatus(200);
+  if (body.object === "page") {
 
-        const event = req.body.entry[0].messaging[0];
-        const senderId = event.sender.id;
+    for (const entry of body.entry) {
 
-        if (!event.message || !event.message.text) {
-            return res.sendStatus(200);
+      const event = entry.messaging[0];
+
+      const sender = event.sender.id;
+
+      const msg = event.message?.text;
+
+      if (!msg) continue;
+
+
+      // ---------- HI / HELLO ----------
+
+      if (
+        msg.toLowerCase() === "hi" ||
+        msg.toLowerCase() === "hello"
+      ) {
+
+        await sendButtons(sender);
+
+        return res.sendStatus(200);
+
+      }
+
+
+      // ---------- OPTION 2 ----------
+
+      if (msg === "2") {
+
+        await sendText(
+          sender,
+          "আমাদের সম্পর্কে জানতে এখানে যান:\nhttps://quantummethod.org.bd/bn"
+        );
+
+        return res.sendStatus(200);
+
+      }
+
+
+      // ---------- OPTION 1 OR DATA ----------
+
+      try {
+
+        const r = await axios.post(SCRIPT_URL, {
+          text: msg
+        });
+
+        const data = r.data;
+
+        if (data.status === "exist") {
+
+          await sendText(
+            sender,
+            `Hello ${data.name}
+এই নাম্বারে আগে entry আছে
+Problem: ${data.problem}`
+          );
+
         }
 
-        const text = event.message.text.trim();
+        if (data.status === "saved") {
 
-        // =========================
-        // GREETING
-        // =========================
+          await sendText(
+            sender,
+            `Thanks ${data.name}
+Phone: ${data.phone}
+Problem: ${data.problem}
+Save হয়েছে`
+          );
 
-        if (["hi", "hello"].includes(text.toLowerCase())) {
-            return sendMenu(senderId);
         }
 
-        // =========================
-        // MENU CLICK HANDLER
-        // =========================
+      } catch (e) {
 
-        if (text === "Contact Representative") {
-            return sendText(senderId,
-                "Doya kore ei format e likhun:\n\n016XXXXXXXX, apnar problem"
-            );
-        }
+        await sendText(sender, "Error");
 
-        if (text === "About Us") {
-            await sendText(senderId,
-                "Amader somporke jante visit korun:\nhttps://quantummethod.org.bd/bn"
-            );
+      }
 
-            return sendText(senderId,
-                "Thanks for interested about us."
-            );
-        }
-
-        // =========================
-        // PHONE + DESCRIPTION DETECT
-        // =========================
-
-        const phoneMatch = text.match(/01\d{9}/);
-
-        if (phoneMatch) {
-
-            const phone = phoneMatch[0];
-
-            // Remove only phone number
-            const description = text.replace(phone, "").trim();
-
-            const fullName = await getUserName(senderId);
-
-            // Send to Google Sheet
-            const response = await axios.post(SHEET_URL, {
-                si: senderId,
-                date: new Date().toISOString().split("T")[0],
-                name: fullName,
-                phone: phone,
-                problem: description
-            });
-
-            // =========================
-            // DUPLICATE CHECK
-            // =========================
-
-            if (response.data.status === "exists") {
-
-                return sendText(senderId,
-                    `Hello ${fullName}, apnar ${phone} number e age data entry newa hoyeche.\nProblem: ${response.data.problem}`
-                );
-            }
-
-            // Mask phone number
-            const maskedPhone = phone.substring(0,3) + "******";
-
-            return sendText(senderId,
-                `Thank you ${fullName}, For filling this.\n\nSummary:\nYour Phone Number: ${maskedPhone}\nProblem: ${description}\n\nApnar shofol vabe save hoyeche. Khub shigroi amader akjon protinidhi apnar shathe jogajog korbe.`
-            );
-        }
-
-        res.sendStatus(200);
-
-    } catch (error) {
-        console.log(error);
-        res.sendStatus(200);
     }
 
+  }
+
+  res.sendStatus(200);
+
 });
 
-// =======================
-// QUICK REPLY MENU
-// =======================
 
-async function sendMenu(id) {
 
-    await axios.post(
-        `https://graph.facebook.com/v15.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
-        {
-            recipient: { id: id },
-            message: {
-                text: "Ami apnake kivabe shahajjo korte pari?",
-                quick_replies: [
-                    {
-                        content_type: "text",
-                        title: "Contact Representative",
-                        payload: "CONTACT"
-                    },
-                    {
-                        content_type: "text",
-                        title: "About Us",
-                        payload: "ABOUT"
-                    }
-                ]
-            }
-        }
-    );
-}
-
-// =======================
+// =============================
+// SEND TEXT
+// =============================
 
 async function sendText(id, text) {
 
-    await axios.post(
-        `https://graph.facebook.com/v15.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
-        {
-            recipient: { id: id },
-            message: { text: text }
+  await axios.post(
+    `https://graph.facebook.com/v18.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+    {
+      recipient: { id },
+      message: { text }
+    }
+  );
+
+}
+
+
+
+// =============================
+// SEND BUTTONS
+// =============================
+
+async function sendButtons(id) {
+
+  await axios.post(
+    `https://graph.facebook.com/v18.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`,
+    {
+      recipient: { id },
+
+      message: {
+        attachment: {
+          type: "template",
+          payload: {
+            template_type: "button",
+            text:
+              "আমি আপনাকে কিভাবে সাহায্য করতে পারি?",
+
+            buttons: [
+              {
+                type: "postback",
+                title: "প্রতিনিধির সাথে যোগাযোগ",
+                payload: "1"
+              },
+
+              {
+                type: "postback",
+                title: "আমাদের সম্পর্কে",
+                payload: "2"
+              }
+            ]
+          }
         }
-    );
+      }
+
+    }
+  );
+
 }
 
-// =======================
 
-async function getUserName(senderId) {
 
-    const url = `https://graph.facebook.com/${senderId}?fields=first_name,last_name&access_token=${PAGE_ACCESS_TOKEN}`;
-
-    const res = await axios.get(url);
-
-    return `${res.data.first_name} ${res.data.last_name}`;
-}
-
-// =======================
-
-const PORT = process.env.PORT || 10000;
-app.listen(PORT, () => console.log("Server running on", PORT));
+app.listen(PORT, () => {
+  console.log("Server running");
+});
