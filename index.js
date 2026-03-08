@@ -33,14 +33,18 @@ app.post('/webhook', async (req, res) => {
         else if (['hi', 'hello', 'হাই', 'হ্যালো'].includes(text.toLowerCase())) {
             // কার্ড এবং নিচে Quick Replies সহ ফাংশন কল
             const elements = [{
-                title: "আপনাকে কীভাবে সাহায্য করতে পারি?",
-                subtitle:"1️⃣ আমাদের প্রতিনিধির সাথে সরাসরি যোগাযোগ করতে চাইলে নিচের ❶ নম্বর বাটনে ক্লিক করুন।\n\n2️⃣ আমাদের সম্পর্কে বিস্তারিত জানতে চাইলে নিচের ❷ নম্বর বাটনে ক্লিক করুন।",
-                image_url: "https://i.imgur.com/your-main-image-url.png" // এখানে আপনার ছবির লিঙ্ক দিন
+                title: "আপনাকে কীভাবে সাহায্য করতে পারি?\n\n",
+                subtitle:" .................",
+                image_url: "https://quantummethod.org.bd/en" // এখানে আপনার ছবির লিঙ্ক দিন
             }];
 
+            const welcomeText = 
+                    "1️⃣ আমাদের প্রতিনিধির সাথে সরাসরি যোগাযোগ করতে চাইলে নিচের ❶ নম্বর বাটনে ক্লিক করুন।\n\n" +
+                    "2️⃣ আমাদের সম্পর্কে বিস্তারিত জানতে চাইলে নিচের ❷ নম্বর বাটনে ক্লিক করুন।";
+
             const quickReplies = [
-                { content_type: "text", title: " ❶ ", payload: "1" },
-                { content_type: "text", title: " ❷ ", payload: "2" }
+                { content_type: "text", title: "     ❶     ", payload: "1" },
+                { content_type: "text", title: "     ❷     ", payload: "2" }
             ];
 
             await sendGenericWithQuickReplies(senderId, elements, quickReplies);
