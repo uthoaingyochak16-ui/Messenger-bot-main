@@ -58,7 +58,7 @@ app.post('/webhook', async (req, res) => {
 });
 
 // নতুন ফাংশন: Generic Template + Quick Replies
-async function sendGenericWithQuickReplies(senderId, elements, quickReplies) {
+async function sendGenericWithQuickReplies(senderId, elements,welcomeText, quickReplies) {
     await axios.post(`https://graph.facebook.com/v19.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
         recipient: { id: senderId },
         message: {
@@ -69,6 +69,14 @@ async function sendGenericWithQuickReplies(senderId, elements, quickReplies) {
                     elements: elements
                 }
             },
+            // quick_replies: quickReplies
+        }
+    });
+    
+    await axios.post(`https://graph.facebook.com/v19.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
+        recipient: { id: senderId },
+        message: {
+            text: welcomeText, 
             quick_replies: quickReplies
         }
     });
