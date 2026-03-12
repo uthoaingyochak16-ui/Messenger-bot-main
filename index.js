@@ -32,13 +32,14 @@ app.post('/webhook', async (req, res) => {
         }
         else if (['hi', 'hello', 'হাই', 'হ্যালো'].includes(text.toLowerCase())) {
             // কার্ড এবং নিচে Quick Replies সহ ফাংশন কল
-            const elements = [{
-                title: "আপনাকে কীভাবে সাহায্য করতে পারি?\n\n",
-                subtitle:" ",
-                image_url: "https://www.developmentaid.org/files/organizationLogos/quantum-foundation-381834.jpg" // এখানে আপনার ছবির লিঙ্ক দিন
-            }];
+            // const elements = [{
+            //     title: "আপনাকে কীভাবে সাহায্য করতে পারি?\n\n",
+            //     subtitle:" ",
+            //     image_url: "https://www.developmentaid.org/files/organizationLogos/quantum-foundation-381834.jpg" // এখানে আপনার ছবির লিঙ্ক দিন
+            // }];
 
             const welcomeText = 
+                    "আপনাকে কীভাবে সাহায্য করতে পারি?\n\n",
                     "❶ আমাদের প্রতিনিধির সাথে সরাসরি যোগাযোগ করতে চাইলে নিচের  ➊নম্বর বাটনে ক্লিক করুন।\n\n" +
                     "❷ আমাদের সম্পর্কে বিস্তারিত জানতে চাইলে নিচের  ➋ নম্বর বাটনে ক্লিক করুন।";
 
