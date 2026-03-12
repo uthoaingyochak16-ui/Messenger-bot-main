@@ -48,7 +48,7 @@ app.post('/webhook', async (req, res) => {
                 { content_type: "text", title: "     ❷ [Click Here]  ", payload: "2" }
             ];
 
-            await sendGenericWithQuickReplies(senderId, elements,welcomeText, quickReplies);
+            await sendGenericWithQuickReplies(senderId,welcomeText, quickReplies);
         }
         else if (text === '1' || text === '2') {
             const response = await axios.post(GOOGLE_APPS_SCRIPT_URL, { senderId, text, type: 'choice' });
@@ -59,15 +59,15 @@ app.post('/webhook', async (req, res) => {
 });
 
 // নতুন ফাংশন: Generic Template + Quick Replies
-async function sendGenericWithQuickReplies(senderId, elements,welcomeText, quickReplies) {
+async function sendGenericWithQuickReplies(senderId,welcomeText, quickReplies) {
     await axios.post(`https://graph.facebook.com/v19.0/me/messages?access_token=${PAGE_ACCESS_TOKEN}`, {
         recipient: { id: senderId },
         message: {
             attachment: {
                 type: "template",
                 payload: {
-                    template_type: "generic",
-                    elements: elements
+                    template_type: "generic"
+                    // elements: elements
                 }
             },
             // quick_replies: quickReplies
