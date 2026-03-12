@@ -43,8 +43,8 @@ app.post('/webhook', async (req, res) => {
                     "❷ আমাদের সম্পর্কে বিস্তারিত জানতে চাইলে নিচের  ➋ নম্বর বাটনে ক্লিক করুন।";
 
             const quickReplies = [
-                { content_type: "text", title: "     ❶ 👆 (Click Here) ", payload: "1" },
-                { content_type: "text", title: "     ❷ 👆 (Click Here)  ", payload: "2" }
+                { content_type: "text", title: "     ❶ [Click Here] ", payload: "1" },
+                { content_type: "text", title: "     ❷ [Click Here]  ", payload: "2" }
             ];
 
             await sendGenericWithQuickReplies(senderId, elements,welcomeText, quickReplies);
