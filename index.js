@@ -19,6 +19,10 @@ app.get('/webhook', (req, res) => {
     }
 });
 
+app.get('/', (req, res) => {
+    res.send('Bot is running safely!');
+});
+
 // Handling Incoming Messages
 app.post('/webhook', async (req, res) => {
     const entry = req.body.entry ? req.body.entry[0] : null;
@@ -105,6 +109,6 @@ async function sendMessage(senderId, text) {
 
 // Start Server
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
+app.listen(PORT,'0.0.0.0', () => {
     console.log(`Server is running on port ${PORT}`);
 });
